@@ -26,8 +26,5 @@ go.work
 # .env
 # .env.*
 
-# Swagger docs (auto-generated)
-docs/
-
 # Build output
 bin/ 
