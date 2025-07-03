@@ -1,0 +1,33 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.cov
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Env & config
+# .env
+# .env.*
+
+# Swagger docs (auto-generated)
+docs/
+
+# Build output
+bin/ 
