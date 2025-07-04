@@ -32,3 +32,11 @@ func (r *OrderRepository) FindProductByID(id uint) (*models.Product, error) {
 	err := r.db.First(&product, id).Error
 	return &product, err
 }
+
+func (r *OrderRepository) WithTx(tx *gorm.DB) *OrderRepository {
+	return &OrderRepository{db: tx}
+}
+
+func (r *OrderRepository) DB() *gorm.DB {
+	return r.db
+}

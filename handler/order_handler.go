@@ -4,13 +4,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/wahyuutomoputra/order-management/dto"
 	"github.com/wahyuutomoputra/order-management/service"
 	"github.com/wahyuutomoputra/order-management/utils"
 )
-
-type OrderRequest struct {
-	Items []service.OrderItemInput `json:"items" validate:"required,dive"`
-}
 
 type OrderHandler struct {
 	OrderService *service.OrderService
@@ -25,7 +22,7 @@ func NewOrderHandler(orderService *service.OrderService) *OrderHandler {
 // @Tags Order
 // @Accept json
 // @Produce json
-// @Param data body OrderRequest true "Order data"
+// @Param data body dto.OrderRequest true "Order data"
 // @Success 201 {object} utils.SuccessResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 401 {object} utils.ErrorResponse
@@ -33,7 +30,7 @@ func NewOrderHandler(orderService *service.OrderService) *OrderHandler {
 // @Router /orders [post]
 func (h *OrderHandler) CreateOrderHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req OrderRequest
+		var req dto.OrderRequest
 		if err := c.ShouldBindJSON(&req); err != nil || len(req.Items) == 0 {
 			utils.JSONError(c, 400, "Invalid request")
 			return

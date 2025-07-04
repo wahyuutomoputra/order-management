@@ -7,18 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 
+	"github.com/wahyuutomoputra/order-management/dto"
 	"github.com/wahyuutomoputra/order-management/models"
 	"github.com/wahyuutomoputra/order-management/service"
 	"github.com/wahyuutomoputra/order-management/utils"
 )
 
 var productValidate = validator.New()
-
-type ProductRequest struct {
-	Name  string  `json:"name" validate:"required,min=2"`
-	Price float64 `json:"price" validate:"required,gt=0"`
-	Stock int     `json:"stock" validate:"required,gte=0"`
-}
 
 type ProductHandler struct {
 	ProductService *service.ProductService
@@ -44,7 +39,7 @@ func AdminOnly() gin.HandlerFunc {
 // @Tags Product
 // @Accept json
 // @Produce json
-// @Param data body ProductRequest true "Product data"
+// @Param data body dto.ProductRequest true "Product data"
 // @Success 201 {object} utils.SuccessResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 403 {object} utils.ErrorResponse
@@ -53,7 +48,7 @@ func AdminOnly() gin.HandlerFunc {
 // @Security BearerAuth
 func (h *ProductHandler) CreateProductHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req ProductRequest
+		var req dto.ProductRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			utils.JSONError(c, 400, "Invalid request")
 			return
@@ -124,7 +119,7 @@ func (h *ProductHandler) GetProductHandler() gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param id path int true "Product ID"
-// @Param data body ProductRequest true "Product data"
+// @Param data body dto.ProductRequest true "Product data"
 // @Success 200 {object} utils.SuccessResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
@@ -134,7 +129,7 @@ func (h *ProductHandler) GetProductHandler() gin.HandlerFunc {
 // @Security BearerAuth
 func (h *ProductHandler) UpdateProductHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req ProductRequest
+		var req dto.ProductRequest
 		var id uint
 		if err := parseUintParam(c, "id", &id); err != nil {
 			utils.JSONError(c, 400, "Invalid product id")

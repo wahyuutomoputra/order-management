@@ -3,8 +3,10 @@ package service
 import (
 	"errors"
 
+	"github.com/wahyuutomoputra/order-management/dto"
 	"github.com/wahyuutomoputra/order-management/models"
 	"github.com/wahyuutomoputra/order-management/repository"
+	"gorm.io/gorm"
 )
 
 type OrderService struct {
@@ -15,35 +17,44 @@ func NewOrderService(repo *repository.OrderRepository) *OrderService {
 	return &OrderService{repo}
 }
 
-type OrderItemInput struct {
-	ProductID uint `json:"product_id" validate:"required"`
-	Quantity  int  `json:"quantity" validate:"required,gt=0"`
-}
-
-func (s *OrderService) CreateOrder(userID uint, items []OrderItemInput) (*models.Order, error) {
-	order := models.Order{
-		UserID:    userID,
-		CreatedAt: int64(0), // set di handler
-	}
-	var orderItems []models.OrderItem
-	for _, item := range items {
-		product, err := s.repo.FindProductByID(item.ProductID)
-		if err != nil {
-			return nil, errors.New("product not found")
+func (s *OrderService) CreateOrder(userID uint, items []dto.OrderItemInput) (*models.Order, error) {
+	var resultOrder *models.Order
+	err := s.repo.DB().Transaction(func(tx *gorm.DB) error {
+		repoTx := s.repo.WithTx(tx)
+		order := models.Order{
+			UserID:    userID,
+			CreatedAt: int64(0), // set di handler
 		}
-		if product.Stock < item.Quantity {
-			return nil, errors.New("Insufficient stock for product: " + product.Name)
+		var orderItems []models.OrderItem
+		for _, item := range items {
+			product, err := repoTx.FindProductByID(item.ProductID)
+			if err != nil {
+				return errors.New("product not found")
+			}
+			if product.Stock < item.Quantity {
+				return errors.New("Insufficient stock for product: " + product.Name)
+			}
+			product.Stock -= item.Quantity
+			if err := repoTx.UpdateProduct(product); err != nil {
+				return err
+			}
+			orderItems = append(orderItems, models.OrderItem{
+				ProductID: product.ID,
+				Quantity:  item.Quantity,
+				Price:     product.Price,
+			})
 		}
-		product.Stock -= item.Quantity
-		s.repo.UpdateProduct(product)
-		orderItems = append(orderItems, models.OrderItem{
-			ProductID: product.ID,
-			Quantity:  item.Quantity,
-			Price:     product.Price,
-		})
+		order.Items = orderItems
+		if err := repoTx.Create(&order); err != nil {
+			return err
+		}
+		resultOrder = &order
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
-	order.Items = orderItems
-	return &order, s.repo.Create(&order)
+	return resultOrder, nil
 }
 
 func (s *OrderService) GetOrderHistory(userID uint) ([]models.Order, error) {

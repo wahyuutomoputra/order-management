@@ -8,6 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/wahyuutomoputra/order-management/dto"
 	"github.com/wahyuutomoputra/order-management/middleware"
 	"github.com/wahyuutomoputra/order-management/models"
 	"github.com/wahyuutomoputra/order-management/service"
@@ -24,32 +25,19 @@ func NewAuthHandler(userService *service.UserService) *AuthHandler {
 	return &AuthHandler{UserService: userService}
 }
 
-// Register & Login Request struct
-
-type RegisterRequest struct {
-	Name     string `json:"name" validate:"required,min=3"`
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
-}
-
-type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
-}
-
 // RegisterHandler godoc
 // @Security BearerAuth
 // @Summary Register user
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param data body RegisterRequest true "Register data"
+// @Param data body dto.RegisterRequest true "Register data"
 // @Success 201 {object} utils.SuccessResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Router /register [post]
 func (h *AuthHandler) RegisterHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req RegisterRequest
+		var req dto.RegisterRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			utils.JSONError(c, 400, "Invalid request")
 			return
@@ -83,14 +71,14 @@ func (h *AuthHandler) RegisterHandler() gin.HandlerFunc {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param data body LoginRequest true "Login data"
+// @Param data body dto.LoginRequest true "Login data"
 // @Success 200 {object} utils.SuccessResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 401 {object} utils.ErrorResponse
 // @Router /login [post]
 func (h *AuthHandler) LoginHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req LoginRequest
+		var req dto.LoginRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			utils.JSONError(c, 400, "Invalid request")
 			return
