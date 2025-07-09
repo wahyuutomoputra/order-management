@@ -25,10 +25,12 @@ import (
 // @name Authorization
 
 func main() {
+	log.Println("Connecting to database...")
 	db, err := config.ConnectDB()
 	if err != nil {
 		log.Fatal("failed to connect database: ", err)
 	}
+	log.Println("Connected to database.")
 	// Auto migrate
 	if err := db.AutoMigrate(&models.User{}, &models.Product{}, &models.Order{}, &models.OrderItem{}); err != nil {
 		log.Fatalf("Database migration failed: %v", err)
