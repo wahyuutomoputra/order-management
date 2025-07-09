@@ -30,8 +30,11 @@ jobs:
           name: go-app-binary
           path: app-linux-amd64
 
-      - name: Upload binary with scp (manual)
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Upload binary using sshpass + scp
         run: |
-          echo "${{ secrets.VPS_KEY }}" | base64 -d > private_key
-          chmod 600 private_key
-          scp -o StrictHostKeyChecking=no -i private_key app-linux-amd64 ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/order-management-api/
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" \
+            scp -o StrictHostKeyChecking=no -P ${{ secrets.VPS_PORT }} \
+            app-linux-amd64 ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/order-management-api/
