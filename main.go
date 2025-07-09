@@ -30,7 +30,11 @@ func main() {
 		log.Fatal("failed to connect database: ", err)
 	}
 	// Auto migrate
-	db.AutoMigrate(&models.User{}, &models.Product{}, &models.Order{}, &models.OrderItem{})
+	if err := db.AutoMigrate(&models.User{}, &models.Product{}, &models.Order{}, &models.OrderItem{}); err != nil {
+		log.Fatalf("Database migration failed: %v", err)
+	} else {
+		log.Println("Database migration successful")
+	}
 
 	var count int64
 	db.Model(&models.User{}).Where("role = ?", "admin").Count(&count)
