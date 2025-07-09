@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -25,7 +26,7 @@ import (
 // @name Authorization
 
 func main() {
-	log.Println("Connecting to database...")
+	fmt.Println("Starting Order Management API...")
 	db, err := config.ConnectDB()
 	if err != nil {
 		log.Fatal("failed to connect database: ", err)
