@@ -29,3 +29,13 @@ jobs:
       with:
         name: go-app-binary
         path: app-linux-amd64
+
+    - name: Upload binary to VPS
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        port: ${{ secrets.VPS_PORT }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_KEY }}
+        source: "app-linux-amd64"
+        target: "/var/www/order-management-api"
