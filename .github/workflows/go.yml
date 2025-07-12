@@ -42,13 +42,31 @@ jobs:
             root@${{ secrets.VPS_HOST }} \
             "mkdir -p /var/www/order-management-api && chmod 755 /var/www/order-management-api"
 
-      - name: Upload binary using sshpass + scp (as root)
+      - name: Upload binary to /root (to avoid overwrite conflict)
         run: |
-          echo "📦 Mengunggah binary ke VPS sebagai root..."
+          echo "📦 Upload binary sementara ke /root..."
           sshpass -p "${{ secrets.VPS_PASSWORD }}" \
             scp -o StrictHostKeyChecking=no -P ${{ secrets.VPS_PORT }} \
             app-linux-amd64 \
-            root@${{ secrets.VPS_HOST }}:/var/www/order-management-api/app-linux-amd64
+            root@${{ secrets.VPS_HOST }}:/root/app-linux-amd64
+
+      - name: Replace binary and restart goweb service
+        run: |
+          echo "🔁 Mengganti binary dan restart service goweb..."
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" \
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.VPS_PORT }} \
+            root@${{ secrets.VPS_HOST }} << 'EOF'
+              echo "⛔ Menghentikan service goweb..."
+              systemctl stop goweb
+
+              echo "📂 Memindahkan binary baru ke folder target..."
+              mv /root/app-linux-amd64 /var/www/order-management-api/app-linux-amd64
+              chmod +x /var/www/order-management-api/app-linux-amd64
+
+              echo "🚀 Menyalakan kembali service goweb..."
+              systemctl start goweb
+              systemctl status goweb --no-pager || true
+          EOF
 
       - name: List files in target directory (debugging)
         run: |
