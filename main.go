@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/wahyuutomoputra/order-management/config"
 	"github.com/wahyuutomoputra/order-management/models"
 	"github.com/wahyuutomoputra/order-management/routes"
@@ -58,6 +59,8 @@ func main() {
 
 	prometheus := ginprometheus.NewPrometheus("gin")
 	prometheus.Use(r)
+
+	r.Use(cors.Default())
 
 	routes.SetupRoutes(r, db)
 
