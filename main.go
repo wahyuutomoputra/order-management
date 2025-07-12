@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/wahyuutomoputra/order-management/config"
+	"github.com/wahyuutomoputra/order-management/docs"
 	"github.com/wahyuutomoputra/order-management/models"
 	"github.com/wahyuutomoputra/order-management/routes"
 
@@ -21,7 +22,7 @@ import (
 // @title Order Management API
 // @version 1.0
 // @description API for order management system
-// @host localhost:8080
+// @host {{.Host}}
 // @BasePath /
 // @securityDefinitions.apikey BearerAuth
 // @in header
@@ -70,5 +71,13 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+
+	// Update Swagger host dynamically
+	host := os.Getenv("SWAGGER_HOST")
+	if host == "" {
+		host = "localhost:" + port
+	}
+	docs.SwaggerInfo.Host = host
+
 	r.Run(":" + port)
 }
