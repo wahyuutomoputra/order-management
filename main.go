@@ -13,6 +13,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "github.com/wahyuutomoputra/order-management/docs"
+	ginprometheus "github.com/zsais/go-gin-prometheus"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -27,6 +28,7 @@ import (
 
 func main() {
 	fmt.Println("Starting Order Management API...")
+
 	db, err := config.ConnectDB()
 	if err != nil {
 		log.Fatal("failed to connect database: ", err)
@@ -53,6 +55,9 @@ func main() {
 	}
 
 	r := gin.Default()
+
+	prometheus := ginprometheus.NewPrometheus("gin")
+	prometheus.Use(r)
 
 	routes.SetupRoutes(r, db)
 
