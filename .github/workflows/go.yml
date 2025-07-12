@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,8 +34,18 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
+      - name: Ensure remote directory exists
+        run: |
+          echo "Ensuring target directory exists on VPS..."
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" \
+            ssh -o StrictHostKeyChecking=no -p ${{ secrets.VPS_PORT }} \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            "mkdir -p /var/www/order-management-api && chmod 755 /var/www/order-management-api"
+
       - name: Upload binary using sshpass + scp
         run: |
+          echo "Uploading app-linux-amd64 to VPS..."
           sshpass -p "${{ secrets.VPS_PASSWORD }}" \
             scp -o StrictHostKeyChecking=no -P ${{ secrets.VPS_PORT }} \
-            app-linux-amd64 ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/order-management-api/
+            app-linux-amd64 \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/order-management-api/app-linux-amd64
